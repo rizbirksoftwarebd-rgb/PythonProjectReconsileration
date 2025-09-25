@@ -1,0 +1,14 @@
+[
+    {
+        "username": "testuser",
+        "production_key": "123456",
+        "active": true,
+        "expiration_date": "2025-12-31"
+    },
+    {
+        "username": "admin",
+        "production_key": "admin123",
+        "active": true,
+        "expiration_date": "2026-01-01"
+    }
+]
