@@ -12,45 +12,54 @@ GITHUB_TOKEN   = st.secrets.get("GITHUB_TOKEN", "")
 
 # ✅ Authentication
 auth = Auth(json_url=USERS_JSON_URL, token=GITHUB_TOKEN, local_file="users_local.json")
+
+# === LOGIN FORM ===
 if not auth.session_valid():
-    if not auth.login():
-        st.stop()
+    st.subheader("🔐 Login")
+    username = st.text_input("Username")
+    key = st.text_input("Production Key", type="password")
 
-# ✅ File upload
-file1 = st.file_uploader("📂 Upload RMS Portal Excel File (.xlsx)", type=["xlsx"])
-file2 = st.file_uploader("📂 Upload Bank Portal Excel File (.xlsx)", type=["xlsx"])
+    if st.button("Login"):
+        if auth.login():
+            st.experimental_rerun()  # Refresh page after successful login
+else:
+    st.success(f"✅ Logged in as {st.session_state['user']['username']}")
 
-if file1 and file2:
-    processor = FileProcessor()
-    try:
-        processor.load_files(file1, file2)
-        st.subheader("Preview of RMS Portal")
-        st.dataframe(processor.df1.head())
-        st.subheader("Preview of Bank Portal")
-        st.dataframe(processor.df2.head())
+    # === FILE UPLOAD ===
+    file1 = st.file_uploader("📂 Upload RMS Portal Excel File (.xlsx)", type=["xlsx"])
+    file2 = st.file_uploader("📂 Upload Bank Portal Excel File (.xlsx)", type=["xlsx"])
 
-        col1 = st.selectbox("🔑 Select Column from RMS Portal", options=processor.df1.columns)
-        col2 = st.selectbox("🔑 Select Column from Bank Portal", options=processor.df2.columns)
+    if file1 and file2:
+        processor = FileProcessor()
+        try:
+            processor.load_files(file1, file2)
+            st.subheader("Preview of RMS Portal")
+            st.dataframe(processor.df1.head())
+            st.subheader("Preview of Bank Portal")
+            st.dataframe(processor.df2.head())
 
-        if st.button("🔄 Process Files"):
-            matched, unmatched1, unmatched2 = processor.process(col1, col2)
-            output_path = processor.save_output(file1.name, file2.name, matched, unmatched1, unmatched2)
+            col1 = st.selectbox("🔑 Select Column from RMS Portal", options=processor.df1.columns)
+            col2 = st.selectbox("🔑 Select Column from Bank Portal", options=processor.df2.columns)
 
-            st.success("✅ Processing complete!")
-            with open(output_path, "rb") as f:
-                st.download_button(
-                    label="📥 Download Processed Excel",
-                    data=f.read(),
-                    file_name=os.path.basename(output_path),
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-    except Exception as e:
-        st.error(f"❌ Error: {e}")
+            if st.button("🔄 Process Files"):
+                matched, unmatched1, unmatched2 = processor.process(col1, col2)
+                output_path = processor.save_output(file1.name, file2.name, matched, unmatched1, unmatched2)
 
-st.markdown("---")
-st.markdown("""
-👨‍💻 **Developer Info**  
-**Name:** Rizbi Islam  
-**Role:** QA Engineer & Data Processing Enthusiast  
-**Location:** Bangladesh
-""")
+                st.success("✅ Processing complete!")
+                with open(output_path, "rb") as f:
+                    st.download_button(
+                        label="📥 Download Processed Excel",
+                        data=f.read(),
+                        file_name=os.path.basename(output_path),
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
+
+    st.markdown("---")
+    st.markdown("""
+    👨‍💻 **Developer Info**  
+    **Name:** Rizbi Islam  
+    **Role:** QA Engineer & Data Processing Enthusiast  
+    **Location:** Bangladesh
+    """)
