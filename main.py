@@ -6,12 +6,19 @@ import os
 st.set_page_config(page_title="Excel Matcher", page_icon="🔗", layout="centered")
 st.title("🔗 Excel Column Matcher")
 
-# 👉 Replace with your GitHub repo JSON if available
+# GitHub remote URL & token (optional)
 USERS_JSON_URL = st.secrets.get("USERS_JSON_URL", "")
 GITHUB_TOKEN   = st.secrets.get("GITHUB_TOKEN", "")
 
-# ✅ Authentication
+# Authentication
 auth = Auth(json_url=USERS_JSON_URL, token=GITHUB_TOKEN, local_file="users_local.json")
+
+# === LOGOUT BUTTON ===
+if st.session_state.get("logged_in", False):
+    if st.button("🔓 Logout"):
+        st.session_state["logged_in"] = False
+        st.session_state.pop("user", None)
+        st.experimental_rerun()  # Refresh page to show login form
 
 # === LOGIN FORM ===
 if not auth.session_valid():
@@ -20,8 +27,8 @@ if not auth.session_valid():
     key = st.text_input("Production Key", type="password")
 
     if st.button("Login"):
-        if auth.login():
-            st.experimental_rerun()  # Refresh page after successful login
+        if auth.login(username, key):
+            st.experimental_rerun()  # Refresh page after login
 else:
     st.success(f"✅ Logged in as {st.session_state['user']['username']}")
 

@@ -10,7 +10,7 @@ class Auth:
         self.json_url = json_url
         self.token = token
         self.session_days = session_days
-        self.local_file = local_file  # ✅ Local fallback file
+        self.local_file = local_file  # Local fallback file
 
     def fetch_users(self):
         """Fetch users from GitHub first; if it fails, use local file."""
@@ -32,14 +32,9 @@ class Auth:
             st.error("❌ Local fallback file not found.")
             return []
 
-    def login(self):
-        if "logged_in" not in st.session_state:
-            st.session_state["logged_in"] = False
-
-        username = st.text_input("Username")
-        key = st.text_input("Production Key", type="password")
-
-        if st.button("Login"):
+    def login(self, username: str, key: str) -> bool:
+        """Perform login using provided username and production key."""
+        try:
             users = self.fetch_users()
             for user in users:
                 if user["username"] == username and user["production_key"] == key:
@@ -55,7 +50,10 @@ class Auth:
                     st.success(f"✅ Welcome {username}")
                     return True
             st.error("❌ Invalid username or key")
-        return st.session_state["logged_in"]
+            return False
+        except Exception as e:
+            st.error(f"❌ Error during login: {e}")
+            return False
 
     def session_valid(self):
         return (
