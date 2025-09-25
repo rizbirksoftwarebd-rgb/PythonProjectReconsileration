@@ -15,10 +15,11 @@ auth = Auth(json_url=USERS_JSON_URL, token=GITHUB_TOKEN, local_file="users_local
 
 # === LOGOUT BUTTON ===
 if st.session_state.get("logged_in", False):
-    if st.button("🔓 Logout"):
+    logout_clicked = st.button("🔓 Logout")
+    if logout_clicked:
         st.session_state["logged_in"] = False
         st.session_state.pop("user", None)
-        st.experimental_rerun()  # Refresh page to show login form
+        st.experimental_rerun()  # Safe rerun after logout
 
 # === LOGIN FORM ===
 if not auth.session_valid():
@@ -26,10 +27,18 @@ if not auth.session_valid():
     username = st.text_input("Username")
     key = st.text_input("Production Key", type="password")
 
-    if st.button("Login"):
+    login_clicked = st.button("Login")
+    if login_clicked:
         if auth.login(username, key):
-            st.experimental_rerun()  # Refresh page after login
-else:
+            st.session_state["login_success"] = True
+
+# === Safe rerun after login ===
+if st.session_state.get("login_success", False):
+    st.session_state.pop("login_success")
+    st.experimental_rerun()
+
+# === Main app after login ===
+if auth.session_valid():
     st.success(f"✅ Logged in as {st.session_state['user']['username']}")
 
     # === FILE UPLOAD ===
