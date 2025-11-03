@@ -33,9 +33,9 @@ if not auth.session_valid():
             st.session_state["login_success"] = True
 
 # === Safe rerun after login ===
-if st.session_state.get("login_success", False):
-    st.session_state.pop("login_success")
-    st.experimental_rerun()
+#if st.session_state.get("login_success", False):
+    #st.session_state.pop("login_success")
+    #st.experimental_rerun()
 
 # === Main app after login ===
 if auth.session_valid():
